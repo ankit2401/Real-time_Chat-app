@@ -1,0 +1,73 @@
+<html>
+	<body>
+<style>
+h1{
+	color: blue;
+	text-align: center;
+}
+input[type=text]{
+	width: 500px;
+	margin-top : 5px;
+}
+button[type=submit]{
+	width : 95px;
+}
+#message-container{
+	background-color : lightblue;
+	width : 600px;
+	height : 300px;
+	overflow-y : auto;
+}
+#chat-section {
+	width : 600px;
+	border : 3px grey solid;
+}
+				
+</style>
+		<h1> Send Massage </h1>
+		
+		<div id="chat-section">
+		<form id="chat">
+			<div id="message-container"></div>
+			<input type="text" placeholder="Type a massage" id="message-input" required>
+			<button type="submit" id="send-button">Send</button>
+		</form>
+		</div>
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+			var socket = io();
+			var messageform = document.getElementById('chat');
+			var input = document.getElementById('message-input');
+			var msgcontainer = document.getElementById('message-container');
+			var name = prompt("what is ur name");
+			appendmsg('you joined');
+
+			socket.emit('new-user', name);
+
+			socket.on('user-connected', name => {
+							appendmsg(name + " connected");
+						});
+			socket.on('user-disconnected', name => {
+							appendmsg(name + " disconnected");
+						});
+
+			socket.on('chat-message', data => {
+							appendmsg((data.name) + " : " + (data.message));
+						});
+
+			messageform.addEventListener('submit', function(e) {
+							e.preventDefault();
+							const message = input.value;
+							appendmsg("You : " + message);
+							socket.emit('send-chatmsg', message);
+							input.value = ''
+						});
+			function appendmsg(message) {
+							const msg = document.createElement('div');
+							msg.innerText = message;
+							msgcontainer.append(msg);
+						}
+
+		</script>
+	</body>
+</html>
